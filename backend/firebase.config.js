@@ -8,7 +8,7 @@ const {getFirestore, collection,addDoc} = require("firebase/firestore")
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBKT2WRE6Itp6_cR4b6VO4qTI_yufE6Iu0",
+  apiKey: process.env.FIREBASE_API_KEY,
   authDomain: "caresense360.firebaseapp.com",
   projectId: "caresense360",
   storageBucket: "caresense360.appspot.com",
