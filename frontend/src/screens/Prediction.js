@@ -21,16 +21,10 @@ const Prediction = ({ navigation, route }) => {
     try {
       setloading(true);
       const { data } = await axios.post("/prediction", { symptoms });
-      const stringData = data?.data;
-      const responseString = stringData;
 
-      // Extract doctor recommendation from AI response
-      const doctorRegex = /Doctor To Consult: (\w+)/;
-      const match = responseString.match(doctorRegex);
-
-      if (match) {
-        const doctor = match[1];
-        setupres(doctor);
+      // data.data is now a parsed JSON object from the backend
+      if (data?.data?.doctorToConsult) {
+        setupres(data.data.doctorToConsult);
       }
 
       if (data) {
@@ -68,12 +62,59 @@ const Prediction = ({ navigation, route }) => {
         <View style={styles.resultCard}>
           <Text style={styles.resultTitle}>AI Analysis</Text>
           <View style={styles.divider} />
-          <Text style={styles.resultText}>{responseData?.data}</Text>
 
-          {upres && (
+          {/* Disease & Severity */}
+          <View style={styles.diseaseRow}>
+            <Text style={styles.diseaseName}>
+              {responseData?.data?.possibleDisease || "Unknown"}
+            </Text>
+            {responseData?.data?.severity && (
+              <View style={[styles.severityBadge, 
+                responseData.data.severity === "Severe" && { backgroundColor: "#FEF2F2", borderColor: "#FECACA" },
+                responseData.data.severity === "Moderate" && { backgroundColor: "#FFF7ED", borderColor: "#FED7AA" },
+                responseData.data.severity === "Mild" && { backgroundColor: "#F0FDF4", borderColor: "#BBF7D0" },
+              ]}>
+                <Text style={[styles.severityText,
+                  responseData.data.severity === "Severe" && { color: "#DC2626" },
+                  responseData.data.severity === "Moderate" && { color: "#D97706" },
+                  responseData.data.severity === "Mild" && { color: "#16A34A" },
+                ]}>{responseData.data.severity}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Description */}
+          {responseData?.data?.description && (
+            <Text style={styles.resultText}>{responseData.data.description}</Text>
+          )}
+
+          {/* Immediate Steps */}
+          {responseData?.data?.immediateSteps && responseData.data.immediateSteps.length > 0 && (
+            <View style={styles.stepsBlock}>
+              <Text style={styles.stepsTitle}>Immediate Steps</Text>
+              {responseData.data.immediateSteps.map((step, i) => (
+                <View key={i} style={styles.stepRow}>
+                  <Text style={styles.stepNumber}>{i + 1}</Text>
+                  <Text style={styles.stepText}>{step}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Warning */}
+          {responseData?.data?.warning && (
+            <View style={styles.warningBlock}>
+              <Text style={styles.warningText}>⚠️  {responseData.data.warning}</Text>
+            </View>
+          )}
+
+          {/* Specialist Badge */}
+          {(responseData?.data?.doctorToConsult || upres) && (
             <View style={styles.doctorBadge}>
               <Text style={styles.doctorBadgeLabel}>Recommended Specialist</Text>
-              <Text style={styles.doctorBadgeValue}>{upres}</Text>
+              <Text style={styles.doctorBadgeValue}>
+                {responseData?.data?.doctorToConsult || upres}
+              </Text>
             </View>
           )}
 
@@ -81,7 +122,7 @@ const Prediction = ({ navigation, route }) => {
             <CustomButton
               label={"Consult Now"}
               onPress={() =>
-                navigation.navigate("consult", { doctor: upres ? upres : "" })
+                navigation.navigate("consult", { doctor: responseData?.data?.doctorToConsult || upres || "" })
               }
             />
           </View>
@@ -200,6 +241,80 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     textAlign: "center",
     marginTop: theme.spacing.sm,
+    lineHeight: 20,
+  },
+  diseaseRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: theme.spacing.sm,
+  },
+  diseaseName: {
+    fontFamily: theme.typography.fontFamilies.bold,
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.textPrimary,
+    flex: 1,
+  },
+  severityBadge: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.radii.full,
+    borderWidth: 1,
+    marginLeft: theme.spacing.sm,
+  },
+  severityText: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.xs,
+  },
+  stepsBlock: {
+    marginTop: theme.spacing.md,
+    backgroundColor: "#F8FAFC",
+    borderRadius: theme.radii.md,
+    padding: theme.spacing.md,
+  },
+  stepsTitle: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.sm,
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: theme.spacing.sm,
+  },
+  stepNumber: {
+    fontFamily: theme.typography.fontFamilies.bold,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.surface,
+    backgroundColor: theme.colors.primary,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    textAlign: "center",
+    lineHeight: 20,
+    marginRight: theme.spacing.sm,
+    overflow: "hidden",
+  },
+  stepText: {
+    fontFamily: theme.typography.fontFamilies.regular,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.textPrimary,
+    flex: 1,
+    lineHeight: 20,
+  },
+  warningBlock: {
+    marginTop: theme.spacing.md,
+    backgroundColor: "#FEF2F2",
+    borderRadius: theme.radii.md,
+    padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+  },
+  warningText: {
+    fontFamily: theme.typography.fontFamilies.medium,
+    fontSize: theme.typography.sizes.sm,
+    color: "#DC2626",
     lineHeight: 20,
   },
 });

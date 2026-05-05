@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar } from "react-native";
 import React from "react";
 import { IconButton } from "react-native-paper";
 import { theme } from "../config/theme";
@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   scroll: {
     paddingTop: theme.spacing.xl,

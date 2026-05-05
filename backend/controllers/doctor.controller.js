@@ -143,12 +143,12 @@ const doctorDetailsApplication = asyncHandler(async (req, res) => {
   foundDoctor.info = doctorDetails._id;
   await foundDoctor.save();
 
-  // Update the patient's main user account to have the doctor role
-  await userModel.findOneAndUpdate({ email }, { role: "doctor" });
+  // Update the patient's main user account to pending status (requires admin approval)
+  await userModel.findOneAndUpdate({ email }, { role: "pending_doctor" });
 
   return res.status(201).json({
     success: true,
-    message: "Doctor application submitted for verification",
+    message: "Doctor application submitted! Awaiting admin verification.",
   });
 });
 

@@ -19,11 +19,23 @@ const predictDiseaseHandler = asyncHandler(async (req, res) => {
   // Call the Service Layer to handle the business logic
   const predictedDisease = await predictionService.getDiseasePrediction(symptoms);
 
+  // Parse the JSON response from AI
+  let parsedData;
+  try {
+    let cleaned = predictedDisease.trim();
+    if (cleaned.startsWith("```json")) cleaned = cleaned.substring(7);
+    if (cleaned.startsWith("```")) cleaned = cleaned.substring(3);
+    if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
+    parsedData = JSON.parse(cleaned.trim());
+  } catch (e) {
+    parsedData = { description: predictedDisease };
+  }
+
   // Send the successful response
   res.status(200).send({
     status: true,
     message: "Disease prediction successful",
-    data: predictedDisease,
+    data: parsedData,
   });
 });
 

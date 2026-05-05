@@ -7,8 +7,6 @@ const config = require("../config/env");
  * @returns {string} - The JSON string result from the AI model.
  */
 async function getDiseasePrediction(symptoms) {
-  const prompt = `Analyze the following symptoms and suggest a possible disease(s) in English language: ${symptoms} and give suggested disease on the basis of symptoms in this manner {symptoms:"Pain chest",PossibleDisease:"Angina " , doctorToConsult:"Cardiologist", desription:"Small discription about disease"} dont use asterisk or special characters  in response text`;
-
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -17,9 +15,28 @@ async function getDiseasePrediction(symptoms) {
     },
     body: JSON.stringify({
       model: "llama-3.1-8b-instant",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 1024,
+      messages: [
+        {
+          role: "system",
+          content: `You are a medical AI assistant. When given symptoms, respond ONLY with valid JSON in this exact format (no markdown, no backticks):
+{
+  "symptoms": "user's symptoms",
+  "possibleDisease": "most likely condition",
+  "severity": "Mild/Moderate/Severe",
+  "doctorToConsult": "Specialist type",
+  "description": "2-3 line explanation of the condition",
+  "immediateSteps": ["step 1", "step 2", "step 3"],
+  "warning": "When to seek emergency care (1 line)"
+}
+Be concise. Do not use asterisks or special formatting. Return ONLY valid JSON.`,
+        },
+        {
+          role: "user",
+          content: `My symptoms: ${symptoms}`,
+        },
+      ],
+      temperature: 0.4,
+      max_tokens: 512,
     }),
   });
 

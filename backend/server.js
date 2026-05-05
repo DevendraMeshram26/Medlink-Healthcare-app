@@ -49,6 +49,7 @@ const userRoutes = require("./routes/user.routes");
 const fileRoutes = require("./routes/files.routes");
 const doctorRoutes = require("./routes/doctor.routes");
 const bookingRoutes = require("./routes/booking.routes");
+const adminRoutes = require("./routes/admin.routes");
 const errorHandler = require("./middleware/errorHandler");
 
 // Apply strict rate limit to auth routes only
@@ -60,6 +61,7 @@ app.use("/api/v1/", apiLimiter, userRoutes);
 app.use("/api/v1/", fileRoutes);
 app.use("/api/v1/", doctorRoutes);
 app.use("/api/v1/", bookingRoutes);
+app.use("/api/v1/", adminRoutes);
 
 // Global Error Handler Middleware (must be AFTER all routes)
 app.use(errorHandler);

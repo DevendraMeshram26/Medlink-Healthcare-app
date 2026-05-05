@@ -8,6 +8,7 @@ import NearbyStack from "./NearbyStack";
 import ProfileStack from "./ProfileStack";
 import HomeStack from "./HomeStack";
 import DoctorDashboard from "../screens/DoctorDashboard";
+import AdminDashboard from "../screens/AdminDashboard";
 import { theme } from "../config/theme";
 
 const BottomTabs = createBottomTabNavigator();
@@ -15,6 +16,7 @@ const BottomTabs = createBottomTabNavigator();
 const TabNavigation = () => {
   const { authState } = useContext(AuthContext);
   const isDoctor = authState?.role === "doctor";
+  const isAdmin = authState?.role === "admin";
   return (
     <BottomTabs.Navigator
       screenOptions={{
@@ -45,7 +47,17 @@ const TabNavigation = () => {
           ),
         }}
       />
-      {isDoctor ? (
+      {isAdmin ? (
+        <BottomTabs.Screen
+          name="Admin"
+          component={AdminDashboard}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="shield-check" size={size} color={color} />
+            ),
+          }}
+        />
+      ) : isDoctor ? (
         <BottomTabs.Screen
           name="Dashboard"
           component={DoctorDashboard}

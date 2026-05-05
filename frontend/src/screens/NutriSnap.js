@@ -50,7 +50,23 @@ const NutriSnap = () => {
     }
   };
 
-  const handleGallery = () => {};
+  const handleGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status === "granted") {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+      if (!result.canceled) {
+        setimage(result.assets[0].uri);
+      }
+      setshowModal(false);
+    } else {
+      alert("Sorry, we need gallery permissions to make this work!");
+    }
+  };
 
   const uploadImage = async () => {
     try {
@@ -74,7 +90,9 @@ const NutriSnap = () => {
       setloading(false);
     } catch (error) {
       setloading(false);
-      alert("Failed to analyze the image. Please try again.");
+      console.log("NutriSnap Error:", error?.response?.data || error?.message);
+      const msg = error?.response?.data?.message || error?.message || "Unknown error";
+      alert(`Analysis failed: ${msg}`);
     }
   };
 
@@ -134,14 +152,40 @@ const NutriSnap = () => {
           <InfoRow label="Name" value={foodData?.data?.Name || "Unknown"} />
           <InfoRow label="Status" value={foodData?.data?.status || "N/A"} />
           <InfoRow label="Est. Calories" value={foodData?.data?.est_calories || "N/A"} bold />
-          <InfoRow label="Diet" value={foodData?.data?.diet || "N/A"} />
+
+          {/* Macros Grid */}
+          {foodData?.data?.macros && (
+            <View style={styles.macrosSection}>
+              <Text style={styles.macrosTitle}>Macronutrients</Text>
+              <View style={styles.macrosGrid}>
+                <MacroChip label="Protein" value={foodData.data.macros.protein} color="#10B981" />
+                <MacroChip label="Carbs" value={foodData.data.macros.carbs} color="#0EA5E9" />
+                <MacroChip label="Fats" value={foodData.data.macros.fats} color="#F59E0B" />
+                <MacroChip label="Fiber" value={foodData.data.macros.fiber} color="#8B5CF6" />
+                <MacroChip label="Sugar" value={foodData.data.macros.sugar} color="#F43F5E" />
+              </View>
+            </View>
+          )}
+
+          {/* Health Tip */}
+          {foodData?.data?.healthTip && (
+            <View style={styles.healthTipBlock}>
+              <Text style={styles.healthTipLabel}>💡 Health Tip</Text>
+              <Text style={styles.healthTipText}>{foodData.data.healthTip}</Text>
+            </View>
+          )}
+
+          {/* Diet Suggestion */}
+          {foodData?.data?.diet && (
+            <View style={styles.descriptionBlock}>
+              <Text style={styles.descriptionLabel}>Diet Suggestion</Text>
+              <Text style={styles.descriptionText}>{foodData.data.diet}</Text>
+            </View>
+          )}
 
           {foodData?.data?.description && (
-            <View style={styles.descriptionBlock}>
-              <Text style={styles.descriptionLabel}>Description</Text>
-              <Text style={styles.descriptionText}>
-                {foodData.data.description}
-              </Text>
+            <View style={{ marginTop: theme.spacing.sm }}>
+              <Text style={styles.descriptionText}>{foodData.data.description}</Text>
             </View>
           )}
         </View>
@@ -158,6 +202,17 @@ const InfoRow = ({ label, value, bold }) => (
   <View style={styles.infoRow}>
     <Text style={styles.infoLabel}>{label}</Text>
     <Text style={[styles.infoValue, bold && styles.infoBold]}>{value}</Text>
+  </View>
+);
+
+/** Macro nutrient chip */
+const MacroChip = ({ label, value, color }) => (
+  <View style={[styles.macroChip, { borderColor: color + '30' }]}>
+    <View style={[styles.macroDot, { backgroundColor: color }]} />
+    <View>
+      <Text style={styles.macroValue}>{value || 'N/A'}</Text>
+      <Text style={styles.macroLabel}>{label}</Text>
+    </View>
   </View>
 );
 
@@ -311,6 +366,66 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamilies.regular,
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.textPrimary,
+    lineHeight: 20,
+  },
+  macrosSection: {
+    marginTop: theme.spacing.md,
+  },
+  macrosTitle: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.sm,
+  },
+  macrosGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.spacing.sm,
+  },
+  macroChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radii.md,
+    borderWidth: 1,
+    minWidth: "45%",
+  },
+  macroDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: theme.spacing.sm,
+  },
+  macroValue: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.textPrimary,
+  },
+  macroLabel: {
+    fontFamily: theme.typography.fontFamilies.regular,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.textMuted,
+  },
+  healthTipBlock: {
+    marginTop: theme.spacing.md,
+    backgroundColor: "#FFF7ED",
+    borderRadius: theme.radii.md,
+    padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: "#FED7AA",
+  },
+  healthTipLabel: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.sm,
+    color: "#92400E",
+    marginBottom: theme.spacing.xs,
+  },
+  healthTipText: {
+    fontFamily: theme.typography.fontFamilies.regular,
+    fontSize: theme.typography.sizes.sm,
+    color: "#78350F",
     lineHeight: 20,
   },
 });

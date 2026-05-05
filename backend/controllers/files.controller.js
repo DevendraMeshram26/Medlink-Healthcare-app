@@ -21,14 +21,34 @@ async function analyzeFood(filePath) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "llama-3.2-90b-vision-preview",
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
       messages: [
+        {
+          role: "system",
+          content: "You are a professional nutritionist AI. Analyze food images and return ONLY valid JSON with no markdown formatting. Be concise and accurate.",
+        },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: 'Analyse the food in this image and answer in only in English language and give output in this manner in a json format eg {"Name":"Chicken Burger","status":"unhealthy","description":"the food contains paneer and gravy","est_calories":"400-500 cal","XP":"the value ranges from 1-10 depending on the food health","diet":"suggest a good diet for the person to stay fit and healthy"} pls do not hallucinate and give unique recommendations. Return ONLY valid JSON, no markdown.',
+              text: `Analyze the food in this image. Return ONLY valid JSON in this exact format:
+{
+  "Name": "Food name",
+  "status": "healthy/moderate/unhealthy",
+  "est_calories": "300-400 cal",
+  "macros": {
+    "protein": "12g",
+    "carbs": "45g",
+    "fats": "8g",
+    "fiber": "3g",
+    "sugar": "5g"
+  },
+  "description": "Brief 1-line description of the food",
+  "healthTip": "One practical health tip about this food",
+  "diet": "Brief diet suggestion in 1-2 lines"
+}
+Return ONLY valid JSON, no markdown, no backticks.`,
             },
             {
               type: "image_url",
@@ -39,8 +59,8 @@ async function analyzeFood(filePath) {
           ],
         },
       ],
-      temperature: 0.4,
-      max_tokens: 1024,
+      temperature: 0.3,
+      max_tokens: 512,
     }),
   });
 
@@ -95,10 +115,18 @@ const uploadFile = asyncHandler(async (req, res) => {
   // Clean up uploaded file after processing
   fs.unlink(filePath, () => {});
 
+  // Parse the JSON string from the AI model
+  let parsedData;
+  try {
+    parsedData = JSON.parse(analysisResult);
+  } catch (e) {
+    parsedData = { Name: "Unknown", description: analysisResult };
+  }
+
   res.status(200).send({
     status: true,
     message: "Food analysis complete",
-    data: analysisResult,
+    data: parsedData,
   });
 });
 

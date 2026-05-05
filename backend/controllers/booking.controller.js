@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { doctor_details } = require("../models/doctorRegisteration.model");
 const Booking = require("../models/booking.model");
 const User = require("../models/user.model");
+const Notification = require("../models/notification.model");
 const asyncHandler = require("../utils/asyncHandler");
 
 const createBooking = asyncHandler(async (req, res) => {
@@ -35,6 +36,18 @@ const createBooking = asyncHandler(async (req, res) => {
       doctor: doctor._id,
       appointment: timing,
     });
+
+    // Notify the doctor about the new booking
+    const doctorUser = await User.findOne({ email: doctor.email });
+    if (doctorUser) {
+      await Notification.create({
+        userId: doctorUser._id,
+        title: "New Appointment Booked! 📅",
+        message: `${user.name} has booked an appointment with you for ${new Date(timing).toLocaleString()}.`,
+        type: "booking",
+      });
+    }
+
     return res.status(200).json({
       message: "Booking created successfully",
       success: true,
