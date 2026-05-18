@@ -23,6 +23,10 @@ password:{
 role:{
     type:String,
     default:"user",
+},
+profilePicture:{
+    type:String,
+    default:"",
 }
 
 

@@ -57,6 +57,11 @@ const DoctorInfo = ({ route, navigation }) => {
                 {docData?.info?.experience || "0"} yrs exp
               </Text>
             </View>
+            <View style={[styles.badge, styles.ratingBadge]}>
+              <Text style={styles.ratingText}>
+                ⭐ {docData?.avgRating || 0} ({docData?.reviewCount || 0})
+              </Text>
+            </View>
           </View>
         </View>
       </View>
@@ -169,6 +174,15 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamilies.medium,
     fontSize: theme.typography.sizes.xs,
     color: theme.colors.primary,
+  },
+  ratingBadge: {
+    backgroundColor: '#FFFBEB',
+    marginLeft: theme.spacing.xs,
+  },
+  ratingText: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.xs,
+    color: '#D97706',
   },
   // Details
   detailsCard: {

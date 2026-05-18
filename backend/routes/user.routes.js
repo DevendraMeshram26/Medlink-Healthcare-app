@@ -5,12 +5,15 @@ const {
   LoginController,
   AuthController,
   UpdateProfileController,
+  uploadAvatarController,
 } = require("../controllers/user.controller");
 const authMiddleware = require("../middleware/authMiddleware");
+const { upload } = require("../controllers/files.controller");
 
 router.post("/register", RegisterController);
 router.post("/login", LoginController);
 router.get("/get-user-data", authMiddleware, AuthController);
 router.put("/update-profile", authMiddleware, UpdateProfileController);
+router.post("/upload-avatar", authMiddleware, upload.single("image"), uploadAvatarController);
 
 module.exports = router;

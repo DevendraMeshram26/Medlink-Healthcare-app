@@ -146,8 +146,43 @@ const getAppointmentDetails = asyncHandler(async (req, res) => {
     });
 });
 
+const updateBookingStatus = asyncHandler(async (req, res) => {
+  const { bookingId } = req.params;
+  const { status } = req.body;
+
+  if (!['pending', 'confirmed', 'rejected', 'completed'].includes(status)) {
+    return res.status(400).json({ message: "Invalid status", success: false });
+  }
+
+  const booking = await Booking.findById(bookingId).populate('patient').populate('doctor');
+  if (!booking) {
+    return res.status(404).json({ message: "Booking not found", success: false });
+  }
+
+  booking.status = status;
+  await booking.save();
+
+  // Notify the patient about the status change
+  if (status === 'confirmed' || status === 'rejected') {
+    const doctorDetails = await doctor_details.findById(booking.doctor);
+    await Notification.create({
+      userId: booking.patient._id,
+      title: `Appointment ${status === 'confirmed' ? 'Confirmed ✅' : 'Rejected ❌'}`,
+      message: `Your appointment with Dr. ${doctorDetails?.name || 'Doctor'} on ${new Date(booking.appointment).toLocaleString()} was ${status}.`,
+      type: "booking",
+    });
+  }
+
+  return res.status(200).json({
+    message: `Booking status updated to ${status}`,
+    success: true,
+    data: booking
+  });
+});
+
 module.exports = {
   createBooking,
   getBookingDetailsUser,
   getAppointmentDetails,
+  updateBookingStatus,
 };

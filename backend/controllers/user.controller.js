@@ -137,9 +137,45 @@ const UpdateProfileController = asyncHandler(async (req, res) => {
   });
 });
 
+const { uploadOnCloudinary } = require("../utils/cloudinary");
+
+/**
+ * Upload an avatar to Cloudinary and update the user's profilePicture field.
+ */
+const uploadAvatarController = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+  const file = req.file;
+
+  if (!file) {
+    return res.status(400).send({ message: "No image provided", success: false });
+  }
+
+  // Upload to Cloudinary
+  const cloudinaryResponse = await uploadOnCloudinary(file.path);
+
+  if (!cloudinaryResponse) {
+    return res.status(500).send({ message: "Failed to upload image", success: false });
+  }
+
+  const updatedUser = await userModel
+    .findByIdAndUpdate(userId, { profilePicture: cloudinaryResponse.secure_url }, { new: true })
+    .select("-password");
+
+  if (!updatedUser) {
+    return res.status(404).send({ message: "User not found", success: false });
+  }
+
+  res.status(200).send({
+    success: true,
+    message: "Profile picture updated successfully",
+    data: updatedUser,
+  });
+});
+
 module.exports = {
   RegisterController,
   LoginController,
   AuthController,
   UpdateProfileController,
+  uploadAvatarController,
 };

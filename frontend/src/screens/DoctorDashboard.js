@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, RefreshControl, Platform, StatusBar } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, RefreshControl, Platform, StatusBar, TouchableOpacity, Alert } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../state/AuthContext";
@@ -36,6 +36,18 @@ const DoctorDashboard = () => {
     }, 2000);
   };
 
+  const updateStatus = async (bookingId, status) => {
+    try {
+      const { data } = await axios.put(`/booking-status/${bookingId}`, { status });
+      if (data.success) {
+        Alert.alert("Success", data.message);
+        getAppointments(); // Refresh the list
+      }
+    } catch (error) {
+      alert("Failed to update status");
+    }
+  };
+
   useEffect(() => {
     getAppointments();
   }, [authState?.doctorId]);
@@ -70,12 +82,42 @@ const DoctorDashboard = () => {
         ) : (
           <View style={{ paddingBottom: theme.spacing.xxl }}>
             {appointments.map((appt) => (
-              <AppointmentCard
-                key={appt._id}
-                PatientName={appt.patient?.name}
-                AppointmentTime={appt.appointment}
-                isDoctorView={true}
-              />
+              <View key={appt._id} style={styles.appointmentWrapper}>
+                <AppointmentCard
+                  PatientName={appt.patient?.name}
+                  AppointmentTime={appt.appointment}
+                  status={appt.status}
+                  isDoctorView={true}
+                />
+                
+                {appt.status === "pending" && (
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, styles.acceptBtn]}
+                      onPress={() => updateStatus(appt._id, "confirmed")}
+                    >
+                      <Text style={styles.actionBtnText}>Accept</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, styles.rejectBtn]}
+                      onPress={() => updateStatus(appt._id, "rejected")}
+                    >
+                      <Text style={[styles.actionBtnText, { color: theme.colors.error }]}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {appt.status === "confirmed" && (
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, styles.completeBtn]}
+                      onPress={() => updateStatus(appt._id, "completed")}
+                    >
+                      <Text style={styles.actionBtnText}>Mark Completed</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             ))}
           </View>
         )}
@@ -143,5 +185,39 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: theme.spacing.sm,
     lineHeight: 20,
+  },
+  appointmentWrapper: {
+    marginBottom: theme.spacing.md,
+  },
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: -theme.spacing.sm,
+    gap: theme.spacing.sm,
+  },
+  actionBtn: {
+    flex: 1,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radii.md,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+  },
+  acceptBtn: {
+    backgroundColor: theme.colors.success,
+    borderColor: theme.colors.success,
+  },
+  rejectBtn: {
+    backgroundColor: "#FFF1F2",
+    borderColor: "#FECDD3",
+  },
+  completeBtn: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  actionBtnText: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.surface,
   },
 });

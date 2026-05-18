@@ -7,10 +7,20 @@ const AppointmentCard = ({
   PatientName,
   specialization,
   AppointmentTime,
+  status = "pending",
   isDoctorView = false,
 }) => {
   // Format the date if it's a valid date string
   const formattedTime = new Date(AppointmentTime).toLocaleString();
+
+  const getStatusColor = () => {
+    switch (status) {
+      case "confirmed": return theme.colors.success;
+      case "rejected": return theme.colors.error;
+      case "completed": return theme.colors.primary;
+      default: return theme.colors.warning;
+    }
+  };
 
   return (
     <View style={styles.card}>
@@ -25,6 +35,11 @@ const AppointmentCard = ({
           {!isDoctorView && specialization && (
             <Text style={styles.subtitle}>{specialization}</Text>
           )}
+        </View>
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor() + '20' }]}>
+          <Text style={[styles.statusText, { color: getStatusColor() }]}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </Text>
         </View>
       </View>
       <View style={styles.timeBlock}>
@@ -100,5 +115,14 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamilies.semiBold,
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.primary,
+  },
+  statusBadge: {
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 4,
+    borderRadius: theme.radii.full,
+  },
+  statusText: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.xs,
   },
 });

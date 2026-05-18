@@ -86,7 +86,7 @@ const Profile = ({ navigation }) => {
         <View style={styles.profileCard}>
           <View style={styles.avatarContainer}>
             <Image
-              source={{ uri: "https://via.placeholder.com/150" }}
+              source={{ uri: authState?.profilePicture || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRECWxY9RPTChUABfN3UAc73uSH6Gh2eiwewQ&usqp=CAU" }}
               style={styles.avatar}
             />
             <View style={styles.onlineDot} />

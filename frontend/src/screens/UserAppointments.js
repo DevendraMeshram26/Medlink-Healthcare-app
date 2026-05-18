@@ -4,11 +4,13 @@ import {
   View,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../state/AuthContext";
 import AppointmentCard from "../components/general/AppointmentCard";
+import ReviewModal from "../components/general/ReviewModal";
 import { theme } from "../config/theme";
 
 /**
@@ -20,6 +22,8 @@ const UserAppointments = () => {
   const { authState } = useContext(AuthContext);
   const [appointments, setAppointments] = useState([]);
   const [refreshing, setrefreshing] = useState(false);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [selectedDoctorId, setSelectedDoctorId] = useState(null);
 
   const userID = authState?.Userid;
 
@@ -76,15 +80,41 @@ const UserAppointments = () => {
       ) : (
         <View style={styles.listContainer}>
           {appointments.map((appointment) => (
-            <AppointmentCard
-              key={appointment._id}
-              Doctor={appointment.doctor?.name}
-              AppointmentTime={appointment?.appointment}
-              specialization={appointment?.doctor?.info?.specialization}
-            />
+            <View key={appointment._id} style={styles.appointmentWrapper}>
+              <AppointmentCard
+                Doctor={appointment.doctor?.name}
+                AppointmentTime={appointment?.appointment}
+                specialization={appointment?.doctor?.info?.specialization}
+                status={appointment?.status}
+              />
+              {appointment.status === 'completed' && (
+                <TouchableOpacity 
+                  style={styles.rateButton}
+                  onPress={() => {
+                    setSelectedDoctorId(appointment.doctor?._id);
+                    setReviewModalVisible(true);
+                  }}
+                >
+                  <Text style={styles.rateButtonText}>⭐ Rate Doctor</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           ))}
         </View>
       )}
+
+      <ReviewModal 
+        visible={reviewModalVisible}
+        onClose={() => {
+          setReviewModalVisible(false);
+          setSelectedDoctorId(null);
+        }}
+        doctorId={selectedDoctorId}
+        patientId={userID}
+        onReviewSubmitted={() => {
+          alert("Thank you for your review!");
+        }}
+      />
     </ScrollView>
   );
 };
@@ -140,4 +170,21 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.sm,
     lineHeight: 20,
   },
+  appointmentWrapper: {
+    marginBottom: theme.spacing.md,
+  },
+  rateButton: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+    borderWidth: 1,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radii.md,
+    alignItems: 'center',
+    marginTop: -theme.spacing.sm,
+  },
+  rateButtonText: {
+    fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.sm,
+    color: '#D97706',
+  }
 });
