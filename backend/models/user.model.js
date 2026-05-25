@@ -27,6 +27,14 @@ role:{
 profilePicture:{
     type:String,
     default:"",
+},
+resetPasswordOTP:{
+    type:String,
+    default:null
+},
+resetPasswordExpires:{
+    type:Date,
+    default:null
 }
 
 

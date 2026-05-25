@@ -8,6 +8,8 @@ import TabNavigation from "./TabNavigation";
 import InitialScreen from "../screens/InitialScreen";
 import Login from "../screens/Login";
 import Register from "../screens/Register";
+import ForgotPassword from "../screens/ForgotPassword";
+import ResetPassword from "../screens/ResetPassword";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +27,8 @@ const Routes = () => {
             <Stack.Screen name="initialscreen" component={InitialScreen} />
             <Stack.Screen name="login" component={Login} />
             <Stack.Screen name="register" component={Register} />
+            <Stack.Screen name="forgotpassword" component={ForgotPassword} />
+            <Stack.Screen name="resetpassword" component={ResetPassword} />
             <Stack.Screen name="TabNavigation" component={TabNavigation} />
           </>
         )

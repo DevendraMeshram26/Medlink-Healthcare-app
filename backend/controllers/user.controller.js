@@ -3,6 +3,7 @@ const { doctor_details } = require("../models/doctorRegisteration.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("../utils/asyncHandler");
+const { sendOTPEmail } = require("../utils/mailer");
 
 /**
  * Register a new user.
@@ -172,10 +173,92 @@ const uploadAvatarController = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Controller to handle Forgot Password requests.
+ * Generates a 6-digit OTP code, sets its expiry to 15 minutes, saves it to the database, and sends it to the user.
+ */
+const ForgotPasswordController = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).send({ message: "Please provide an email address", success: false });
+  }
+
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    return res.status(404).send({ message: "No user found with this email address", success: false });
+  }
+
+  // Generate a random 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Set expiration (15 minutes from now)
+  const expiry = new Date();
+  expiry.setMinutes(expiry.getMinutes() + 15);
+
+  user.resetPasswordOTP = otp;
+  user.resetPasswordExpires = expiry;
+  await user.save();
+
+  // Dispatch email asynchronously
+  sendOTPEmail(email, otp);
+
+  res.status(200).send({
+    message: "OTP sent successfully",
+    success: true,
+  });
+});
+
+/**
+ * Controller to handle Reset Password requests.
+ * Compares the entered OTP with the stored OTP, verifies that it hasn't expired, hashes the new password, and saves it.
+ */
+const ResetPasswordController = asyncHandler(async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  if (!email || !otp || !newPassword) {
+    return res.status(400).send({ message: "Please provide all required fields", success: false });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).send({ message: "Password must be at least 6 characters long", success: false });
+  }
+
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    return res.status(404).send({ message: "User not found", success: false });
+  }
+
+  // Check if OTP matches and is not expired
+  if (!user.resetPasswordOTP || user.resetPasswordOTP !== otp) {
+    return res.status(400).send({ message: "Invalid verification code", success: false });
+  }
+
+  if (new Date() > new Date(user.resetPasswordExpires)) {
+    return res.status(400).send({ message: "Verification code has expired", success: false });
+  }
+
+  // Hash new password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  user.password = hashedPassword;
+  user.resetPasswordOTP = null;
+  user.resetPasswordExpires = null;
+  await user.save();
+
+  res.status(200).send({
+    message: "Password reset successful. Please log in with your new password.",
+    success: true,
+  });
+});
+
 module.exports = {
   RegisterController,
   LoginController,
   AuthController,
   UpdateProfileController,
   uploadAvatarController,
+  ForgotPasswordController,
+  ResetPasswordController,
 };

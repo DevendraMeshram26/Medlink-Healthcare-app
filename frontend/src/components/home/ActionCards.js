@@ -1,17 +1,114 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { IconButton } from "react-native-paper";
 import { APP_STRINGS } from "../../config/constants";
 import { theme } from "../../config/theme";
+import { AuthContext } from "../../state/AuthContext";
 
 /**
- * ActionCards component with two feature cards for AI and Doctor Consultation.
+ * ActionCards component with two feature cards.
+ * Tailored dynamically based on the logged-in user's role (patient vs doctor vs admin).
  * Uses elevated card styling with the new teal/slate palette.
  *
  * @param {Object} props
  * @param {Object} props.navigation - React Navigation prop.
  */
 const ActionCards = ({ navigation }) => {
+  const { authState } = useContext(AuthContext);
+  const isDoctor = authState?.role === "doctor";
+  const isAdmin = authState?.role === "admin";
+
+  // 👨‍⚕️ Action cards for Doctors
+  if (isDoctor) {
+    return (
+      <View style={styles.row}>
+        {/* Doctor Dashboard Card */}
+        <TouchableOpacity
+          style={[styles.card, styles.aiCard]}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Dashboard")}
+        >
+          <View style={styles.iconCircle}>
+            <IconButton icon="view-dashboard" iconColor={theme.colors.primary} size={24} />
+          </View>
+          <Text style={styles.cardTitle}>My Dashboard</Text>
+          <Text style={styles.cardTitle}>Manage Schedule</Text>
+          <Text style={styles.cardSubtitle}>
+            View and manage your patient appointments and schedules.
+          </Text>
+          <View style={styles.cardButton}>
+            <Text style={styles.cardButtonText}>Go to Dashboard</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* View Profile Card */}
+        <TouchableOpacity
+          style={[styles.card, styles.doctorCard]}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Profile")}
+        >
+          <View style={styles.iconCircle}>
+            <IconButton icon="account-cog-outline" iconColor={theme.colors.accent} size={24} />
+          </View>
+          <Text style={styles.cardTitle}>Doctor Profile</Text>
+          <Text style={styles.cardTitle}>Account Settings</Text>
+          <Text style={styles.cardSubtitle}>
+            Update your professional info, fees, and bio.
+          </Text>
+          <View style={styles.cardButton}>
+            <Text style={styles.cardButtonText}>View Profile</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // 🛡️ Action cards for Admins
+  if (isAdmin) {
+    return (
+      <View style={styles.row}>
+        {/* Admin Dashboard Card */}
+        <TouchableOpacity
+          style={[styles.card, styles.aiCard]}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Admin")}
+        >
+          <View style={styles.iconCircle}>
+            <IconButton icon="shield-check" iconColor={theme.colors.primary} size={24} />
+          </View>
+          <Text style={styles.cardTitle}>Admin Panel</Text>
+          <Text style={styles.cardTitle}>Verify Doctors</Text>
+          <Text style={styles.cardSubtitle}>
+            Approve pending doctor verification requests and manage users.
+          </Text>
+          <View style={styles.cardButton}>
+            <Text style={styles.cardButtonText}>Open Console</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* View Profile Card */}
+        <TouchableOpacity
+          style={[styles.card, styles.doctorCard]}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Profile")}
+        >
+          <View style={styles.iconCircle}>
+            <IconButton icon="account-cog-outline" iconColor={theme.colors.accent} size={24} />
+          </View>
+          <Text style={styles.cardTitle}>Admin Profile</Text>
+          <Text style={styles.cardTitle}>Settings</Text>
+          <Text style={styles.cardSubtitle}>
+            Manage your credentials and sign out securely.
+          </Text>
+          <View style={styles.cardButton}>
+            <Text style={styles.cardButtonText}>View Profile</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // 👤 Action cards for Patients / Default Users
   return (
     <View style={styles.row}>
       {/* Experience AI Card */}

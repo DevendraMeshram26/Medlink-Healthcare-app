@@ -77,6 +77,13 @@ const Login = ({ navigation }) => {
             value={password}
             setValue={setPassword}
           />
+          <TouchableOpacity
+            style={styles.forgotPasswordContainer}
+            onPress={() => navigation.navigate("forgotpassword")}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Sign In Button */}
@@ -188,6 +195,17 @@ const styles = StyleSheet.create({
   },
   registerLink: {
     fontFamily: theme.typography.fontFamilies.semiBold,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.primary,
+  },
+  forgotPasswordContainer: {
+    alignSelf: "flex-end",
+    marginHorizontal: theme.spacing.lg,
+    marginTop: -4,
+    marginBottom: theme.spacing.sm,
+  },
+  forgotPasswordText: {
+    fontFamily: theme.typography.fontFamilies.medium,
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.primary,
   },
