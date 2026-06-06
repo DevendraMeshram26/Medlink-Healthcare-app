@@ -1,4 +1,9 @@
+const dns = require("node:dns");
 const mongoose = require("mongoose");
+
+// Set DNS servers to resolve MongoDB Atlas SRV records correctly on Windows
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 const URL = process.env.MONGO_URL;
 const DB_connection = async () => {
   try {
