@@ -7,7 +7,7 @@ import { API_BASE_URL } from "@env";
 
 export const AuthContext = createContext();
 
-axios.defaults.baseURL = API_BASE_URL || "http://192.168.1.6:6970/api/v1";
+axios.defaults.baseURL = API_BASE_URL;
 
 /**
  * Axios Response Interceptor
