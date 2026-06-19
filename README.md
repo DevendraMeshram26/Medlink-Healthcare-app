@@ -8,7 +8,7 @@ Medlink is a premium, dual-role healthcare platform designed to bridge the gap b
 
 ### 👤 For Patients
 - **Smart Appointment Booking**: Effortlessly find specialists and book appointments with a few taps.
-- **V-Doc AI Assistant**: Get instant preliminary medical advice and health guidance powered by AI (Gemini/Groq).
+- **V-Doc AI Assistant**: Get instant preliminary medical advice and health guidance powered by Groq AI.
 - **NutriSnap (AI Nutritionist)**: Gain valuable insights about the nutritional content (calories, protein, fats) of food items using integrated AI vision analysis.
 - **Nearby Discovery**: Search for doctors and hospitals based on your location and needs.
 - **Personalized Profile**: Manage your health records and track upcoming appointments.
@@ -31,7 +31,7 @@ Medlink is a premium, dual-role healthcare platform designed to bridge the gap b
 - **Backend**: **Node.js** with **Express.js**
 - **Database**: **MongoDB** with Mongoose
 - **Styling**: Vanilla CSS / React Native StyleSheet (Medlink Design System)
-- **AI Integration**: **Google Gemini (Vision & Text)** & **Groq API**
+- **AI Integration**: **Groq API (LLaMA models)**
 - **Image Handling**: Cloudinary
 - **Navigation**: React Navigation (Stack & Tabs)
 

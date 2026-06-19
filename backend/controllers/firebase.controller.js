@@ -1,2 +1,0 @@
-// all firebase functions
-
