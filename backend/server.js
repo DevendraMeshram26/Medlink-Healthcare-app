@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 
 const app = express();
+app.set("trust proxy", 1); // trust first proxy
 const dotenv = require("dotenv").config();
 const DB_connection = require("./helper/DB_connection");
 
